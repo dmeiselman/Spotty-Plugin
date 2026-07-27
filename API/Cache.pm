@@ -161,6 +161,15 @@ sub normalize {
 			$cache->set('spotify_artist_image_' . $item->{id}, $item->{image}, CACHE_TTL);
 		}
 	}
+	# Spotify returns audiobooks with a spotify:show: uri and the same ID as the
+	# equivalent show - we can therefore treat them like any other show
+	elsif ($type eq 'audiobook') {
+		$item->{image} = $self->getLargestArtwork(delete $item->{images});
+		$item->{artists} ||= [ map { { name => $_->{name} } } @{$item->{authors}} ] if $item->{authors} && ref $item->{authors};
+		$item->{artists} ||= [ map { { name => $_->{name} } } @{$item->{narrators}} ] if $item->{narrators} && ref $item->{narrators};
+		$item->{artists} ||= [{ name => $item->{publisher} }] if $item->{publisher};
+		delete $item->{available_markets};
+	}
 	elsif ($type eq 'show') {
 		$item->{image} = $self->getLargestArtwork(delete $item->{images});
 		$item->{artists} ||= [{ name => $item->{publisher} }] if $item->{publisher};

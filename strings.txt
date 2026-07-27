@@ -1122,6 +1122,9 @@ PLUGIN_SPOTTY_EPISODES
 	NO	Podcast-episoder
 	SV	Podcastavsnitt
 
+PLUGIN_SPOTTY_AUDIOBOOKS
+	EN	Audiobooks
+
 PLUGIN_SPOTTY_ALBUMS_PROGRESS
 	CS	Alba Spotty
 	DA	Spotty albums

@@ -26,6 +26,7 @@ use constant IMG_HOME => 'plugins/Spotty/html/images/home.png';
 use constant IMG_ALBUM => 'plugins/Spotty/html/images/album.png';
 use constant IMG_COMPILATION => 'plugins/Spotty/html/images/compilation.png';
 use constant IMG_PODCAST => 'plugins/Spotty/html/images/podcasts.png';
+use constant IMG_AUDIOBOOK => 'plugins/Spotty/html/images/audiobooks.png';
 use constant IMG_PLAYLIST => 'plugins/Spotty/html/images/playlist.png';
 use constant IMG_COLLABORATIVE => 'plugins/Spotty/html/images/playlist-collab.png';
 use constant IMG_SEARCH => 'plugins/Spotty/html/images/search.png';
@@ -505,6 +506,9 @@ sub search {
 		elsif ($type eq 'episode') {
 			push @items, @{episodesList($client, $results)};
 		}
+		elsif ($type eq 'audiobook') {
+			push @items, @{podcastList($client, $results)};
+		}
 		else {
 			$log->error("Unkonwn search type: ") . Data::Dump::dump($results);
 		}
@@ -575,6 +579,8 @@ sub _searchItems {
 		# https://github.com/spotify/web-api/issues/551#issuecomment-486898766
 		[ 'PLUGIN_SPOTTY_SHOWS', 'show', IMG_PODCAST ],
 		[ 'PLUGIN_SPOTTY_EPISODES', 'episode', IMG_PODCAST ],
+		# audiobooks are shows whose episodes are the chapters - they need the same helper support
+		($canPodcasts ? [ 'PLUGIN_SPOTTY_AUDIOBOOKS', 'audiobook', IMG_AUDIOBOOK ] : ()),
 		[ 'PLUGIN_SPOTTY_USERS', 'user', IMG_ACCOUNT ]
 	);
 
