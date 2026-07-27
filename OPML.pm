@@ -21,6 +21,9 @@ use Slim::Utils::Strings qw(string cstring);
 
 use constant CAN_EXTID => (Slim::Utils::Versions->compareVersions($::VERSION, '8.0.0') >= 0);
 
+# longer descriptions would wrap, rendering the screen unreadable - see episodesList()
+use constant MAX_DESCRIPTION_LENGTH => 200;
+
 use constant IMG_TRACK => '/html/images/cover.png';
 use constant IMG_HOME => 'plugins/Spotty/html/images/home.png';
 use constant IMG_ALBUM => 'plugins/Spotty/html/images/album.png';
@@ -1346,6 +1349,36 @@ sub podcastList {
 	return wantarray ? ($items, $indexList) : $items;
 }
 
+# Spotify show descriptions can run to thousands of characters. Audiobooks are the worst
+# offenders, returning the full publisher blurb - review quotes, award lists and all - but
+# some podcasts are just as long. Used verbatim as line2, that renders the list unreadable
+# in some control apps. The untruncated text still reaches the show's Description item.
+sub _showDescription {
+	my ($show) = @_;
+
+	my $description = $show->{description} || '';
+
+	# audiobook descriptions open with "Author(s): ...\nNarrator(s): ..." - for a book
+	# that's a far more useful second line than the marketing copy which follows it
+	if ( ($show->{type} || '') eq 'audiobook'
+		&& $description =~ /^((?:Author|Narrator)\(s\):.*?)(?:\n\s*\n|\z)/s )
+	{
+		$description = $1;
+	}
+
+	$description =~ s/\s+/ /g;
+	$description =~ s/^\s+|\s+$//g;
+
+	if ( length($description) > MAX_DESCRIPTION_LENGTH ) {
+		$description = substr($description, 0, MAX_DESCRIPTION_LENGTH);
+		# don't cut mid-word if we can avoid it
+		$description =~ s/\s+\S*$// if $description =~ /\s\S{1,20}$/;
+		$description .= "\x{2026}";
+	}
+
+	return $description;
+}
+
 sub _showItem {
 	my ($show, $textkey) = @_;
 
@@ -1353,7 +1386,7 @@ sub _showItem {
 		type  => 'playlist',
 		name  => $show->{name},
 		line1 => $show->{name},
-		line2 => $show->{description},
+		line2 => _showDescription($show),
 		textkey => $textkey,
 		url   => \&show,
 		favorites_url => $show->{uri},
