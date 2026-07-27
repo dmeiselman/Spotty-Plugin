@@ -419,6 +419,7 @@ sub search {
 
 	if (my $uriInfo = parseUri($params->{search})) {
 		$args->{uri} = $uriInfo->{uri};
+		$args->{id}  = $uriInfo->{id};
 		if ($uriInfo->{type} eq 'playlist') {
 			return playlist($client, $cb, $params, $args);
 		}

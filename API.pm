@@ -944,7 +944,10 @@ sub show {
 sub episodes {
 	my ( $self, $cb, $args ) = @_;
 
-	my ($id) = $args->{id};
+	# callers coming in from a pasted URI only know the uri, not the id
+	my ($id) = $args->{id} || ($args->{uri} || '') =~ /show:(.*)/;
+
+	return $cb->([]) unless $id;
 
 	Plugins::Spotty::API::Pipeline->new($self, "shows/$id/episodes", sub {
 		if ( $_[0] && $_[0]->{items} && ref $_[0]->{items} ) {
